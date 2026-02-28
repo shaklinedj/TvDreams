@@ -1,0 +1,41 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+db/*.db
+
+# Docker and Environment
+.env
+backups/
+docker/certs/
+*.env.backup
+
+# Demo and test files
+*-demo.html
+test-*.mjs
+test-*.js
+
+# Obsolete database files (moved to database/ folder)
+database-schema.sql
+scripts/mysql-schema.sql
+add-session-id-migration.sql

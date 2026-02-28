@@ -1,0 +1,29 @@
+[Unit]
+Description=CMS  - Sistema de Gestion de Contenido para Pantallas Publicitarias
+# Aunque el servicio se llame TvDreams, la descripcion original se mantiene para referencia.
+Documentation=https://github.com/shaklinedj/cms_hlaure
+After=network.target mysql.service
+
+[Service]
+Type=simple
+# ATENCIÓN: Cambiado temporalmente a 'root' para acceder a la ruta de NVM.
+# Se recomienda usar un usuario dedicado (e.g., www-data) despues de configurar los permisos.
+User=root
+WorkingDirectory=/var/www/html/TvDreams
+Environment="NODE_ENV=production"
+
+# Ejecucion corregida: Usa la ruta absoluta de npm bajo NVM y el comando 'start'.
+ExecStart=/root/.nvm/versions/node/v22.20.0/bin/npm start
+
+Restart=always
+RestartSec=10
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=TvDreams
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

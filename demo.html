@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo - Auto-scaling File Sizes</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .demo-card {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            margin: 16px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .demo-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 16px;
+        }
+        .size-demo {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+            margin: 16px 0;
+        }
+        .size-item {
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .size-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #059669;
+        }
+        .size-label {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+        .before-after {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .before, .after {
+            padding: 16px;
+            border-radius: 6px;
+        }
+        .before {
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+        }
+        .after {
+            background: #d1fae5;
+            border: 1px solid #a7f3d0;
+        }
+        .section-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+        .before .section-title {
+            color: #dc2626;
+        }
+        .after .section-title {
+            color: #059669;
+        }
+        .highlight {
+            background: #fef3c7;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-card">
+        <div class="demo-title">🎯 File Size Auto-Scaling Implementation</div>
+        <p>Implementación de escalado automático de unidades de archivo (Bytes → KB → MB → GB → TB → PB)</p>
+    </div>
+
+    <div class="demo-card">
+        <div class="demo-title">📊 Examples of Auto-Scaling</div>
+        <div class="size-demo">
+            <div class="size-item">
+                <div class="size-value" id="size-1">512 Bytes</div>
+                <div class="size-label">Small file</div>
+            </div>
+            <div class="size-item">
+                <div class="size-value" id="size-2">15.50 MB</div>
+                <div class="size-label">Image file</div>
+            </div>
+            <div class="size-item">
+                <div class="size-value" id="size-3">2.34 GB</div>
+                <div class="size-label">Video file</div>
+            </div>
+            <div class="size-item">
+                <div class="size-value" id="size-4">1.75 TB</div>
+                <div class="size-label">Large dataset</div>
+            </div>
+            <div class="size-item">
+                <div class="size-value" id="size-5">3.21 PB</div>
+                <div class="size-label">Enterprise storage</div>
+            </div>
+            <div class="size-item">
+                <div class="size-value" id="size-6">150.00 MB</div>
+                <div class="size-label">Network usage/hour</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="demo-card">
+        <div class="demo-title">🔄 Before vs After</div>
+        <div class="before-after">
+            <div class="before">
+                <div class="section-title">❌ Before (Fixed Units)</div>
+                <p><strong>Storage:</strong> <span class="highlight">1536 MB</span> (should be 1.5 GB)</p>
+                <p><strong>Network:</strong> <span class="highlight">2048MB</span> (hardcoded)</p>
+                <p><strong>File Upload:</strong> <span class="highlight">5242880 bytes / 1024 / 1024</span></p>
+                <p><strong>Validation:</strong> <span class="highlight">"Máximo 10MB"</span> (hardcoded)</p>
+            </div>
+            <div class="after">
+                <div class="section-title">✅ After (Auto-Scaling)</div>
+                <p><strong>Storage:</strong> <span class="highlight">1.50 GB</span> (auto-scaled)</p>
+                <p><strong>Network:</strong> <span class="highlight">2.00 GB</span> (dynamic)</p>
+                <p><strong>File Upload:</strong> <span class="highlight">5.00 MB</span></p>
+                <p><strong>Validation:</strong> <span class="highlight">"Máximo 10 MB"</span> (calculated)</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="demo-card">
+        <div class="demo-title">⚙️ Implementation Features</div>
+        <ul>
+            <li>✅ <strong>Dashboard Analytics:</strong> Storage and network usage auto-scale</li>
+            <li>✅ <strong>Media Uploader:</strong> File size validation and progress displays</li>
+            <li>✅ <strong>File Listings:</strong> Individual file sizes properly formatted</li>
+            <li>✅ <strong>System Metrics:</strong> All size data throughout the application</li>
+            <li>✅ <strong>Future-Proof:</strong> Supports up to YottaBytes (YB)</li>
+            <li>✅ <strong>Configurable:</strong> Binary (1024) or metric (1000) scaling</li>
+        </ul>
+    </div>
+
+    <div class="demo-card">
+        <div class="demo-title">🛠️ Technical Implementation</div>
+        <p><strong>New Utility:</strong> <code>src/lib/file-utils.ts</code></p>
+        <p><strong>Key Function:</strong> <code>formatFileSize(bytes, si = false, dp = 2)</code></p>
+        <p><strong>Updated Components:</strong> Dashboard, MediaUploader, File listings</p>
+        <p><strong>Scaling Range:</strong> Bytes → KB → MB → GB → TB → PB → EB → ZB → YB</p>
+    </div>
+
+    <script>
+        // Simulate the formatFileSize function for demo
+        function formatFileSize(bytes, si = false, dp = 2) {
+            if (!bytes || bytes === 0 || isNaN(bytes)) return '0 Bytes';
+            
+            const thresh = si ? 1000 : 1024;
+            const units = si
+                ? ['Bytes', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+                : ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+            if (Math.abs(bytes) < thresh) {
+                return bytes + ' Bytes';
+            }
+
+            const i = Math.floor(Math.log(Math.abs(bytes)) / Math.log(thresh));
+            const unitIndex = Math.min(i, units.length - 1);
+            const value = bytes / Math.pow(thresh, unitIndex);
+            
+            return value.toFixed(dp) + ' ' + units[unitIndex];
+        }
+
+        // Update the demo values
+        document.getElementById('size-1').textContent = formatFileSize(512);
+        document.getElementById('size-2').textContent = formatFileSize(15.50 * 1024 * 1024);
+        document.getElementById('size-3').textContent = formatFileSize(2.34 * 1024 * 1024 * 1024);
+        document.getElementById('size-4').textContent = formatFileSize(1.75 * 1024 * 1024 * 1024 * 1024);
+        document.getElementById('size-5').textContent = formatFileSize(3.21 * 1024 * 1024 * 1024 * 1024 * 1024);
+        document.getElementById('size-6').textContent = formatFileSize(150 * 1024 * 1024);
+    </script>
+</body>
+</html>

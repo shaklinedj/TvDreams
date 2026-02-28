@@ -1,0 +1,9 @@
+● TvDreams.service - CMS  - Sistema de Gestion de Contenido para Pantallas Publicitarias
+     Loaded: loaded (/etc/systemd/system/TvDreams.service; enabled; vendor preset: enabled)
+     Active: activating (auto-restart) (Result: exit-code) since Sat 2025-10-11 15:50:10 -03; 7s ago
+       Docs: https://github.com/shaklinedj/cms_hlaure
+    Process: 3204065 ExecStart=/root/.nvm/versions/node/v22.20.0/bin/npm start [0;1;31m(code=exited, status=127)[0m
+   Main PID: 3204065 (code=exited, status=127)
+
+oct 11 15:50:10 fss-PowerEdge-R510 systemd[1]: [0;1;39m[0;1;31m[0;1;39mTvDreams.service: Main process exited, code=exited, status=127/n/a[0m
+oct 11 15:50:10 fss-PowerEdge-R510 systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mTvDreams.service: Failed with result 'exit-code'.[0m
