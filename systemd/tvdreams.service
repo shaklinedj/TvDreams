@@ -1,0 +1,36 @@
+[Unit]
+Description=TvDreams CMS and Display Server
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/path/to/TvDreams
+EnvironmentFile=-/path/to/TvDreams/.env
+ExecStart=/usr/bin/env pnpm run start
+Restart=always
+RestartSec=10
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=TvDreams
+
+[Install]
+WantedBy=multi-user.target
+[Unit]
+Description=TvDreams CMS and Display Server
+After=network.target
+
+[Service]
+Type=simple
+# WorkingDirectory will be replaced by the deploy script when installed
+WorkingDirectory=/path/to/TvDreams
+# Load environment file if present (optional)
+EnvironmentFile=-/path/to/TvDreams/.env
+ExecStart=/usr/bin/env pnpm run start
+Restart=always
+RestartSec=10
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=TvDreams
+
+[Install]
+WantedBy=multi-user.target

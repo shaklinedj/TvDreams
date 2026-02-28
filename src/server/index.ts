@@ -20,6 +20,40 @@ import ffmpegPath from 'ffmpeg-static';
 import os from 'os';
 import { v4 as uuidv4 } from 'uuid';
 
+// Recent prizes persistence
+const RECENT_PRIZES_DIR = path.join(process.cwd(), 'data');
+const RECENT_PRIZES_FILE = path.join(RECENT_PRIZES_DIR, 'recent-prizes.json');
+
+const writeRecentPrizes = async (arr: Array<Record<string, unknown>>) => {
+  try {
+    await fs.promises.mkdir(RECENT_PRIZES_DIR, { recursive: true });
+    const tmp = RECENT_PRIZES_FILE + '.tmp';
+    await fs.promises.writeFile(tmp, JSON.stringify(arr, null, 2), 'utf8');
+    await fs.promises.rename(tmp, RECENT_PRIZES_FILE);
+  } catch (e) {
+    console.error('[Premio] ❌ Failed to write recent prizes file:', e);
+  }
+};
+
+const appendRecentPrize = async (prize: Record<string, unknown>) => {
+  try {
+    let existing: Array<Record<string, unknown>> = [];
+    try {
+      const raw = await fs.promises.readFile(RECENT_PRIZES_FILE, 'utf8');
+      existing = JSON.parse(raw) as Array<Record<string, unknown>>;
+    } catch (e) {
+      // ignore read errors, treat as empty
+      existing = [];
+    }
+
+    existing.unshift(prize);
+    const truncated = existing.slice(0, 3);
+    await writeRecentPrizes(truncated);
+  } catch (e) {
+    console.error('[Premio] ❌ Failed to persist recent prize:', e);
+  }
+};
+
 // Set ffmpeg path
 if (ffmpegPath) {
   ffmpeg.setFfmpegPath(ffmpegPath);
@@ -345,6 +379,12 @@ const connectToPremioService = () => {
 // Helper: broadcast show_prize to all connected displays
 const broadcastPrize = (data: object) => {
   const prizeWithTimestamp = { ...(data as Record<string, unknown>), receivedAt: Date.now() };
+  // Persist last 3 prizes to disk for dashboard retrieval
+  try {
+    appendRecentPrize(prizeWithTimestamp as Record<string, unknown>);
+  } catch (e) {
+    console.error('[Premio] ❌ Error scheduling prize persistence:', e);
+  }
   let displayCount = 0;
   let cmsCount = 0;
   wss.clients.forEach((client) => {
@@ -986,6 +1026,18 @@ app.get('/api/health', (req, res) => {
     status: 'healthy',
     timestamp: Date.now()
   });
+});
+
+// Recent prizes retrieval for dashboard
+app.get('/api/premio/recent', async (req, res) => {
+  try {
+    const raw = await fs.promises.readFile(RECENT_PRIZES_FILE, 'utf8');
+    const arr = JSON.parse(raw);
+    res.json(arr);
+  } catch (e) {
+    // If file missing or parse error, return empty array
+    res.json([]);
+  }
 });
 
 // Test prize endpoint - sends show_prize to all connected displays

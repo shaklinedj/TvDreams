@@ -120,6 +120,13 @@ export default function CMSDashboard() {
       .then(r => r.json())
       .then(d => setPremioServiceConnected(d.connected === true))
       .catch(() => {});
+    // Fetch last 3 recent prizes persisted on the server
+    fetch('/api/premio/recent')
+      .then(r => r.json())
+      .then(list => {
+        if (Array.isArray(list)) setRecentPrizes(list as Array<Record<string, unknown>>);
+      })
+      .catch(() => {});
     
     // Setup WebSocket for real-time updates
     websocketClient.connect();
