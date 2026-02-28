@@ -25,7 +25,6 @@ dist-ssr
 db/*.db
 
 # Docker and Environment
-.env
 backups/
 docker/certs/
 *.env.backup
