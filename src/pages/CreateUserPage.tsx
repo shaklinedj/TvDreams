@@ -6,7 +6,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { apiService } from '@/lib/mock-backend';
 import { ArrowLeft, Mail, User, Shield, Copy, ExternalLink, Send } from 'lucide-react';
 import { toast } from 'sonner';
 

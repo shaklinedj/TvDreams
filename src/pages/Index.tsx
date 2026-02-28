@@ -172,9 +172,8 @@ export default function CMSDashboard() {
   }, [screens]);
 
   const loadData = async () => {
-    await loadMediaFiles();
-    await loadScreens();
-    await loadFolders();
+    // Run all independent loads concurrently
+    await Promise.all([loadMediaFiles(), loadScreens(), loadFolders()]);
     // Analytics will be loaded on-demand when the analytics tab is opened
   };
 
@@ -554,7 +553,7 @@ export default function CMSDashboard() {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {recentPrizes.map((prize, idx) => (
-                    <div key={idx} className="flex flex-col gap-0.5 rounded-lg border border-yellow-200 bg-yellow-50 dark:bg-yellow-950/20 dark:border-yellow-800 px-3 py-2">
+                    <div key={prize.receivedAt ? String(prize.receivedAt) : `prize-${idx}`} className="flex flex-col gap-0.5 rounded-lg border border-yellow-200 bg-yellow-50 dark:bg-yellow-950/20 dark:border-yellow-800 px-3 py-2">
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-semibold text-yellow-700 dark:text-yellow-400 uppercase tracking-wide">#{recentPrizes.length - idx}</span>
                         <span className="text-xs text-muted-foreground">
@@ -744,12 +743,15 @@ export default function CMSDashboard() {
                       {filteredFiles.map((file) => (
                         <div 
                           key={file.id} 
+                          role="button"
+                          tabIndex={0}
                           className={`group relative cursor-pointer ${
                             isMultiSelectMode && selectedMediaFiles.has(file.id) 
                               ? 'ring-2 ring-blue-500 bg-blue-50' 
                               : ''
                           }`}
                           onClick={() => isMultiSelectMode && toggleMediaSelection(file.id)}
+                          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { isMultiSelectMode && toggleMediaSelection(file.id); } }}
                         >
                           {isMultiSelectMode && (
                             <div className="absolute top-2 left-2 z-20">

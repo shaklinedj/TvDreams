@@ -192,6 +192,6 @@ class ApiService {
   }
 }
 
-export const apiService = new ApiService();
-// For backward compatibility, we can also export it as mockBackend
-export const mockBackend = apiService;
+export const mockBackend = new ApiService();
+// Backward-compat alias (prefer mockBackend)
+export const apiService = mockBackend;

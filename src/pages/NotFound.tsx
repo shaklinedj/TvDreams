@@ -26,7 +26,7 @@ export default function NotFoundPage() {
       <div className="absolute inset-0 pointer-events-none">
         {[...Array(20)].map((_, i) => (
           <div
-            key={i}
+            key={`dot-${i}`}
             className="absolute w-2 h-2 bg-yellow-300 rounded-full animate-pulse"
             style={{
               left: `${Math.random() * 100}%`,
@@ -60,7 +60,7 @@ export default function NotFoundPage() {
                 <div className="flex justify-center space-x-2 mt-4">
                   {['4', '0', '4'].map((digit, index) => (
                     <div
-                      key={index}
+                      key={`digit-${digit}-${index}`}
                       className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-red-500 rounded-lg flex items-center justify-center text-white font-bold text-2xl shadow-lg transform hover:scale-110 transition-transform"
                       style={{
                         animationDelay: `${index * 0.2}s`,
