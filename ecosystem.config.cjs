@@ -1,48 +1,56 @@
+// Detect the server's local IP for display clients (can be overridden via env vars)
+const getDisplayHost = () => {
+  if (process.env.DISPLAY_API_BASE_URL || process.env.FRONTEND_URL) return null; // will be overridden below
+  try {
+    const os = require('os');
+    const nets = os.networkInterfaces();
+    for (const name of Object.keys(nets)) {
+      for (const net of nets[name]) {
+        if (net.family === 'IPv4' && !net.internal) return net.address;
+      }
+    }
+  } catch (e) {}
+  return 'localhost';
+};
+
+const displayHost = getDisplayHost() || 'localhost';
+const displayApiBase = process.env.DISPLAY_API_BASE_URL || process.env.FRONTEND_URL || `http://${displayHost}:3001`;
+const displayWsUrl = process.env.DISPLAY_WS_URL || (() => {
+  try {
+    const url = new URL(displayApiBase);
+    const protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
+    return `${protocol}//${url.hostname}:3001`;
+  } catch (e) {
+    return `ws://${displayHost}:3001`;
+  }
+})();
+
 module.exports = {
   apps: [{
     name: 'TvDreams',
-    // Use the local `tsx` binary so PM2 runs the same command as `npm start`
-    script: 'node_modules/.bin/tsx',
-    args: 'src/server/index.ts',
+    // On Linux: PM2 calls `./node_modules/.bin/tsx src/server/index.ts`  (same as npm start)
+    // tsx resolves correctly as a shell script on Linux and as .cmd on Windows
+    script: 'src/server/index.ts',
+    interpreter: './node_modules/.bin/tsx',
     instances: 1,
     autorestart: true,
     watch: false,
     max_memory_restart: '1G',
     env: {
       NODE_ENV: 'production',
-      // Display configuration injected into display.html
-      DISPLAY_API_BASE_URL: process.env.DISPLAY_API_BASE_URL || process.env.FRONTEND_URL || `http://localhost:3001`,
-      DISPLAY_WS_URL: process.env.DISPLAY_WS_URL || (() => {
-        try {
-          const url = new URL(process.env.DISPLAY_API_BASE_URL || process.env.FRONTEND_URL || 'http://localhost:3001');
-          const protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
-          return `${protocol}//${url.hostname}:3001`;
-        } catch (e) {
-          return 'ws://localhost:3001';
-        }
-      })()
+      DISPLAY_API_BASE_URL: displayApiBase,
+      DISPLAY_WS_URL: displayWsUrl,
     },
-    // Provide explicit production env block so `pm2 --env production` finds it
     env_production: {
       NODE_ENV: 'production',
-      DISPLAY_API_BASE_URL: process.env.DISPLAY_API_BASE_URL || process.env.FRONTEND_URL || `http://localhost:3001`,
-      DISPLAY_WS_URL: process.env.DISPLAY_WS_URL || (() => {
-        try {
-          const url = new URL(process.env.DISPLAY_API_BASE_URL || process.env.FRONTEND_URL || 'http://localhost:3001');
-          const protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
-          return `${protocol}//${url.hostname}:3001`;
-        } catch (e) {
-          return 'ws://localhost:3001';
-        }
-      })()
+      DISPLAY_API_BASE_URL: displayApiBase,
+      DISPLAY_WS_URL: displayWsUrl,
     },
-    // Redirect logs to a null device to avoid filling log files by default.
-    // On Windows use 'NUL', on Unix use '/dev/null'.
+    // Logs: null device per platform
     error_file: (process.platform === 'win32') ? 'NUL' : '/dev/null',
     out_file: (process.platform === 'win32') ? 'NUL' : '/dev/null',
     log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
     merge_logs: true,
-    // Small restart delay between crashes to avoid busy-restart loops
     restart_delay: 4000
   }]
 };
