@@ -1,9 +1,9 @@
 module.exports = {
   apps: [{
     name: 'TvDreams',
-    script: 'src/server/index.ts',
-    interpreter: 'node',
-    interpreter_args: '--import tsx',
+    // Use the local `tsx` binary so PM2 runs the same command as `npm start`
+    script: 'node_modules/.bin/tsx',
+    args: 'src/server/index.ts',
     instances: 1,
     autorestart: true,
     watch: false,
