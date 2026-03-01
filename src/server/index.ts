@@ -506,28 +506,23 @@ app.get('/display.html', (req, res, next) => {
     // Fall back to FRONTEND_URL or serverConfig values when DISPLAY_* vars are not provided.
     const displayConfig: any = {};
 
-    // Use the Host header from the request so displays on other machines get the correct server IP
+    // Always derive apiBase from the actual request host so each display
+    // gets the correct IP regardless of which network interface it used.
+    // FRONTEND_URL is intentionally NOT used here — it is for the admin UI,
+    // not for display clients. Only DISPLAY_API_BASE_URL can override this.
     const requestHost = req.hostname || req.get('host')?.split(':')[0] || getLocalIpAddress();
     const serverPort = process.env.DISPLAY_WS_PORT || serverConfig.port;
     const apiBase = process.env.DISPLAY_API_BASE_URL
-      || process.env.FRONTEND_URL
       || `http://${requestHost}:${serverPort}`;
     displayConfig.apiBaseUrl = apiBase;
 
     if (process.env.DISPLAY_WS_URL) {
       displayConfig.wsUrl = process.env.DISPLAY_WS_URL;
     } else {
-      // Derive wsUrl from apiBase but force server port (e.g., :3001)
-      try {
-        const parsed = new URL(apiBase);
-        const wsProtocol = parsed.protocol === 'https:' ? 'wss:' : 'ws:';
-        const host = parsed.hostname;
-        const port = serverPort;
-        displayConfig.wsUrl = `${wsProtocol}//${host}:${port}`;
-      } catch (e) {
-        // Fallback to serverConfig
-        displayConfig.wsUrl = serverConfig.wsUrl;
-      }
+      // Always build wsUrl from the request host + server port so connects
+      // through any IP on this machine work without manual configuration.
+      const wsProtocol = req.secure ? 'wss:' : 'ws:';
+      displayConfig.wsUrl = `${wsProtocol}//${requestHost}:${serverPort}`;
     }
 
     if (Object.keys(displayConfig).length > 0) {
