@@ -28,10 +28,11 @@ const displayWsUrl = process.env.DISPLAY_WS_URL || (() => {
 module.exports = {
   apps: [{
     name: 'TvDreams',
-    // On Linux: PM2 calls `./node_modules/.bin/tsx src/server/index.ts`  (same as npm start)
-    // tsx resolves correctly as a shell script on Linux and as .cmd on Windows
-    script: 'src/server/index.ts',
-    interpreter: './node_modules/.bin/tsx',
+    // Use the real tsx CLI entry point (.mjs) so PM2 runs `node tsx.mjs src/server/index.ts`
+    // This works on both Linux and Windows without shim issues.
+    script: 'node_modules/tsx/dist/cli.mjs',
+    args: 'src/server/index.ts',
+    interpreter: 'node',
     instances: 1,
     autorestart: true,
     watch: false,
