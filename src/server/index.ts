@@ -301,7 +301,7 @@ const connectToPremioService = () => {
     const wsUrl = normalizeWsUrl(PREMIO_WS_URL);
     externalWs = new WebSocket(wsUrl);
 
-    externalWs.onopen = () => {
+    externalWs.on('open', () => {
       premioReconnectAttempts = 0;
       isPremioConnected = true;
       console.log('[Server] Connected to premio service');
@@ -316,11 +316,11 @@ const connectToPremioService = () => {
           }
         }
       });
-    };
+    });
 
-    externalWs.onmessage = (event) => {
+    externalWs.on('message', (rawData) => {
       try {
-        const data = JSON.parse(event.data.toString());
+        const data = JSON.parse(rawData.toString());
         // console.log('[Premio] 📨 Mensaje recibido del servicio externo:', JSON.stringify(data));
         if (data.type === 'premio' || data.tipo === 'premio') {
           broadcastPrize(data);
@@ -330,7 +330,7 @@ const connectToPremioService = () => {
       } catch (e) {
         console.error('[Premio] ❌ Error parseando mensaje:', e);
       }
-    };
+    });
 
     externalWs.onclose = () => {
       externalWs = null;
@@ -353,7 +353,7 @@ const connectToPremioService = () => {
       }
     };
 
-    externalWs.onerror = (err) => {
+    externalWs.on('error', (err) => {
       isPremioConnected = false;
       console.error('[Server] Premio WebSocket error:', err);
       // Notify CMS clients about error state
@@ -369,7 +369,7 @@ const connectToPremioService = () => {
       try { if (externalWs) externalWs.close(); } catch (e) {}
       externalWs = null;
       schedulePremioReconnect();
-    };
+    });
   } catch (err) {
     console.error('[Server] Failed to connect to premio service:', err);
     schedulePremioReconnect();
