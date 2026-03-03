@@ -1,0 +1,100 @@
+version: '3.8'
+
+services:
+  # Base de datos MySQL
+  db:
+    image: mysql:8.0-alpine
+    container_name: tvdreams-db
+    restart: unless-stopped
+    environment:
+      # Variables de MySQL
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-cms_usuarios_jules}
+      MYSQL_USER: ${MYSQL_USER:-cms_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-cms_password}
+      
+      # Para inicialización automática
+      MYSQL_ROOT_HOST: '%'
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      # Persistencia de datos de la base de datos
+      - db_data:/var/lib/mysql
+      # Scripts de inicialización automática (MySQL los ejecuta al iniciar)
+      - ./database/setup-database.sql:/docker-entrypoint-initdb.d/01-setup.sql:ro
+      - ./database/full-schema.sql:/docker-entrypoint-initdb.d/02-schema.sql:ro
+    networks:
+      - tvdreams-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 20s
+    command:
+      - "--default-authentication-plugin=mysql_native_password"
+      - "--character-set-server=utf8mb4"
+      - "--collation-server=utf8mb4_unicode_ci"
+      - "--max_connections=1000"
+      - "--max_allowed_packet=256M"
+
+  # Aplicación TvDreams (Node.js + Express)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tvdreams-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Node
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 3001
+      
+      # JWT
+      JWT_SECRET: ${JWT_SECRET:-your-secret-jwt-key-change-in-production}
+      
+      # Database (usar 'db' como hostname, es el nombre del contenedor)
+      MYSQL_HOST: ${MYSQL_HOST:-db}
+      MYSQL_PORT: ${MYSQL_PORT:-3306}
+      MYSQL_USER: ${MYSQL_USER:-cms_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-cms_password}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-cms_usuarios_julius}
+      
+      # Frontend URL (para enlaces en emails y URLs compartidas)
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
+      
+      # Gmail (opcional)
+      GMAIL_APP_PASSWORD: ${GMAIL_APP_PASSWORD:-}
+      GMAIL_USER: ${GMAIL_USER:-}
+      
+    ports:
+      - "${APP_PORT:-3001}:3001"
+    
+    volumes:
+      # Uploads de archivos
+      - ./uploads:/app/uploads
+      # Datos persistentes (premios recientes)
+      - ./data:/app/data
+      # Logs (opcional)
+      - ./logs:/app/logs
+    
+    networks:
+      - tvdreams-network
+    
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3001/api/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+networks:
+  tvdreams-network:
+    driver: bridge
+
+volumes:
+  db_data:
+    driver: local

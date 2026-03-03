@@ -1,6 +1,56 @@
-# CMS Usuarios Jules
+# 🐳 CMS TvDreams - Sistema de Gestión de Displays
 
-Sistema de gestión de contenido para pantallas publicitarias con soporte MySQL.
+Sistema moderno de gestión de contenido para pantallas publicitarias con soporte MySQL, WebSockets en tiempo real y Docker.
+
+---
+
+## 🚀 INICIO RÁPIDO CON DOCKER (Recomendado)
+
+Si tienes **Docker instalado**, inicia la aplicación en **3 minutos**:
+
+### 1. Instala Docker
+- **Windows/macOS:** [Docker Desktop](https://www.docker.com/products/docker-desktop)
+- **Linux:** `sudo apt install docker.io docker-compose`
+
+### 2. Ejecuta el inicializador
+
+```bash
+cd TvDreams
+./init-docker.sh
+```
+
+### 3. Accede a la aplicación
+
+```
+🌐 http://localhost:3001
+📺 Display: http://localhost:3001/display.html
+```
+
+**¡Eso es todo!** La BD se inicializa automáticamente.
+
+---
+
+## 📚 **Documentación Docker**
+
+Elige según tu necesidad:
+
+| Documento | Para | Tiempo |
+|-----------|------|--------|
+| **[DOCKER-PRIMEROS-PASOS.md](./DOCKER-PRIMEROS-PASOS.md)** | Usuarios sin experiencia técnica | 5 min |
+| **[DOCKER-QUICK-REF-ES.md](./DOCKER-QUICK-REF-ES.md)** | Referencia rápida de comandos | 2 min |
+| **[DOCKER-DEPLOYMENT.md](./DOCKER-DEPLOYMENT.md)** | Guía completa y producción | 30 min |
+| **[DOCKER-SETUP-COMPLETE.md](./DOCKER-SETUP-COMPLETE.md)** | Qué cambió en la dockerización | 10 min |
+
+### Scripts helper incluidos:
+
+```bash
+./init-docker.sh       # Primera configuración (UNA SOLA VEZ)
+./docker-manager.sh    # Menú interactivo diario
+./verify-docker.sh     # Verificar sistema antes de iniciar
+./backup-docker.sh     # Backup automático de BD + archivos
+```
+
+---
 
 ## 📚 **Documentación Completa**
 
@@ -10,19 +60,25 @@ Sistema de gestión de contenido para pantallas publicitarias con soporte MySQL.
 - 🚀 **[docs/guides/DEPLOY.md](./docs/guides/DEPLOY.md)** - Guía detallada de despliegue en producción
 - 🌐 **[docs/guides/REVERSE-PROXY.md](./docs/guides/REVERSE-PROXY.md)** - Configuración de proxy reverso para URLs profesionales
 - 📸 **[screenshots/README.md](./screenshots/README.md)** - Capturas de pantalla de la aplicación
+
 # TvDreams — CMS y servidor de display
 
-Proyecto actualizado: este fork incorpora múltiples mejoras respecto al repositorio original. Cambios clave: integración robusta de WebSockets para displays, persistencia local de los últimos premios (sin DB), pruebas manuales de envío de premios, y un helper de despliegue que soporta `pm2` o `systemd`.
+Proyecto actualizado: este fork incorpora múltiples mejoras respecto al repositorio original. Cambios clave: integración robusta de WebSockets para displays, persistencia local de los últimos premios (sin DB), pruebas manuales de envío de premios, **dockerización completa**, y un helper de despliegue que soporta `pm2` o `systemd`.
 
-## Enlaces de documentación
+## Enlaces de documentación rápidos
+- 🐳 **[DOCKER-PRIMEROS-PASOS.md](./DOCKER-PRIMEROS-PASOS.md)** - Para empezar en 3 minutos
 - Resumen y guías: [docs/guides/RESUMEN-APLICACION.md](./docs/guides/RESUMEN-APLICACION.md)
 - Deploy y configuración avanzada: [docs/guides/DEPLOY.md](./docs/guides/DEPLOY.md)
 - Reverse proxy: [docs/guides/REVERSE-PROXY.md](./docs/guides/REVERSE-PROXY.md)
 
 ## Novedades importantes (resumen)
+- 🐳 **Dockerización completa** - Instancia en 3 minutos sin dependencias
+- ✅ **BD automática** - Se inicializa sola desde `database/full-schema.sql`
+- 🔄 **WebSockets robustos** - Transmisión en tiempo real de premios a múltiples displays
+- 💾 **Persistencia local** - Los últimos 3 premios se guardan en `data/recent-prizes.json`
+- 🛠️ **Scripts helper** - Manager interactivo, backups automáticos, verificación del sistema
 - `scripts/deploy.sh`: script interactivo para instalar dependencias, build y opción de desplegar con `pm2` o instalar un `systemd` unit.
 - `systemd/tvdreams.service`: plantilla de unidad systemd añadida (ajusta `WorkingDirectory` y `EnvironmentFile`).
-- Persistencia de premios: los últimos 3 premios se guardan en `data/recent-prizes.json` (sin usar la base de datos).
 - Endpoints útiles:
     - `GET /display.html` — cliente display estático
     - `POST /api/test-prize` — endpoint de prueba para simular envíos de premios
@@ -30,11 +86,10 @@ Proyecto actualizado: este fork incorpora múltiples mejoras respecto al reposit
 - `public/display.js` (display client): usa WebSocket para registrarse y recibir `display_command` con `show_prize`.
 
 ## Requisitos
-- Node.js 18+ (se recomienda LTS)
-- pnpm (recomendado) o npm
-- MySQL/MariaDB si vas a usar la base de datos (opcional para la persistencia de premios, que ahora es local)
+- **Con Docker (recomendado):** Solo Docker Desktop
+- **Sin Docker:** Node.js 18+ + pnpm/npm + MySQL/MariaDB
 
-## Instalación rápida (desarrollo)
+## Instalación rápida (desarrollo sin Docker)
 ```bash
 git clone <repo-url>
 cd TvDreams
@@ -47,6 +102,16 @@ pnpm run dev
 - Frontend: http://localhost:5173
 - Backend API: http://localhost:3001
 - Display (fuera/desde otras máquinas): http://<host>:3001/display.html
+
+---
+
+## 🐳 Instalación con Docker (Producción)
+
+Ver: **[DOCKER-PRIMEROS-PASOS.md](./DOCKER-PRIMEROS-PASOS.md)**
+
+```bash
+./init-docker.sh
+```
 
 ## Construir y ejecutar (producción)
 ```bash

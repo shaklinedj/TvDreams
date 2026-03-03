@@ -1,0 +1,49 @@
+# docker-compose.prod.yml
+# Versión optimizada para producción
+# Uso: docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+version: '3.8'
+
+services:
+  db:
+    # Override para producción
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      # Usar volumen con driver local en ubicación específica
+      - db_data_prod:/var/lib/mysql
+    healthcheck:
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    # Override para producción
+    restart: always
+    environment:
+      NODE_ENV: production
+    # Limitar recursos
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '1'
+          memory: 1G
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3001/api/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  db_data_prod:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /data/tvdreams/mysql

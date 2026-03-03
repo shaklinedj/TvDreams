@@ -1,0 +1,77 @@
+# Git
+.git
+.gitignore
+.gitattributes
+.github
+
+# Node
+node_modules
+npm-debug.log
+pnpm-debug.log
+yarn-error.log
+.pnpm-store
+
+# Archivos temporales
+tmp
+temp
+.tmp
+*.tmp
+
+# Editor & IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Archivos de configuración local
+.env.local
+.env.*.local
+
+# Logs
+logs
+*.log
+
+# Build outputs (no los necesitamos en Docker, que hace su propio build)
+dist
+build
+
+# App data (se maneja con volúmenes)
+uploads
+data
+logs
+
+# Docs y archivos de desarrollo
+docs
+README.md
+CHANGELOG.md
+*.md
+screenshots
+.agents
+
+# Scripts de desarrollo/deploy
+scripts/deploy.sh
+scripts/setup-dirs.js
+monitor-network.sh
+test-network-monitor.sh
+
+# Configuración PM2 (no necesaria en Docker)
+ecosystem.config.cjs
+
+# Configuración Systemd (no necesaria en Docker)
+systemd/
+TvDreams.service
+
+# Archivos de prueba y demo
+demo.html
+tmp_display.html
+*.test.ts
+*.spec.ts
+
+# Otros
+.mgx
+.env.example
+init-db.js
+setup-db.sh
+build_results.txt
