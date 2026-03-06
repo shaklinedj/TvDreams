@@ -269,6 +269,55 @@ let externalWs: WebSocket | null = null;
 let premioReconnectAttempts = 0;
 let premioReconnectTimer: NodeJS.Timeout | null = null;
 let isPremioConnected = false;
+let premioHeartbeatInterval: NodeJS.Timeout | null = null;
+let premioPongTimeout: NodeJS.Timeout | null = null;
+
+const clearPremioHeartbeat = () => {
+  if (premioHeartbeatInterval) {
+    clearInterval(premioHeartbeatInterval);
+    premioHeartbeatInterval = null;
+  }
+
+  if (premioPongTimeout) {
+    clearTimeout(premioPongTimeout);
+    premioPongTimeout = null;
+  }
+};
+
+const startPremioHeartbeat = () => {
+  clearPremioHeartbeat();
+
+  // Ping the upstream premio socket periodically and force reconnect if no pong.
+  premioHeartbeatInterval = setInterval(() => {
+    if (!externalWs || externalWs.readyState !== WebSocket.OPEN) {
+      return;
+    }
+
+    try {
+      externalWs.ping();
+
+      if (premioPongTimeout) {
+        clearTimeout(premioPongTimeout);
+      }
+
+      premioPongTimeout = setTimeout(() => {
+        console.warn('[Server] Premio heartbeat timeout, forcing reconnect');
+        try {
+          externalWs?.terminate();
+        } catch (e) {
+          // ignore termination errors, reconnect path continues via onclose
+        }
+      }, 15000);
+    } catch (e) {
+      console.error('[Server] Premio heartbeat ping failed:', e);
+      try {
+        externalWs?.terminate();
+      } catch (err) {
+        // ignore termination errors
+      }
+    }
+  }, 30000);
+};
 
 const schedulePremioReconnect = () => {
   premioReconnectAttempts = Math.min(premioReconnectAttempts + 1, 10);
@@ -305,6 +354,7 @@ const connectToPremioService = () => {
       premioReconnectAttempts = 0;
       isPremioConnected = true;
       console.log('[Server] Connected to premio service');
+      startPremioHeartbeat();
       // Notify connected CMS clients about premio service availability
       wss.clients.forEach((client) => {
         const wsClient = client as WebSocketConnection;
@@ -319,6 +369,11 @@ const connectToPremioService = () => {
     });
 
     externalWs.on('message', (rawData) => {
+      if (premioPongTimeout) {
+        clearTimeout(premioPongTimeout);
+        premioPongTimeout = null;
+      }
+
       try {
         const data = JSON.parse(rawData.toString());
         // console.log('[Premio] 📨 Mensaje recibido del servicio externo:', JSON.stringify(data));
@@ -333,6 +388,7 @@ const connectToPremioService = () => {
     });
 
     externalWs.onclose = () => {
+      clearPremioHeartbeat();
       externalWs = null;
       isPremioConnected = false;
       console.log('[Server] Premio service disconnected, scheduling reconnect');
@@ -354,6 +410,7 @@ const connectToPremioService = () => {
     };
 
     externalWs.on('error', (err) => {
+      clearPremioHeartbeat();
       isPremioConnected = false;
       console.error('[Server] Premio WebSocket error:', err);
       // Notify CMS clients about error state
@@ -370,8 +427,16 @@ const connectToPremioService = () => {
       externalWs = null;
       schedulePremioReconnect();
     });
+
+    externalWs.on('pong', () => {
+      if (premioPongTimeout) {
+        clearTimeout(premioPongTimeout);
+        premioPongTimeout = null;
+      }
+    });
   } catch (err) {
     console.error('[Server] Failed to connect to premio service:', err);
+    clearPremioHeartbeat();
     schedulePremioReconnect();
   }
 };
